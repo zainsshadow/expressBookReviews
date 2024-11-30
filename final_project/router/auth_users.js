@@ -42,28 +42,83 @@ regd_users.post("/login", (req,res) => {
 });
 
 // Add a book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+regd_users.put("/auths/review/:isbn", (req,res) => {
+  
   //Write your code here
-  const token = req.headers['authorization']; // Get the token from the request header
+ const authHeader = req.headers['authorization'];
+ if (!authHeader || !authHeader.startsWith('Bearer ')) {
+   return res.status(401).json({ message: 'Invalid token format' });
+ }
+ const token = authHeader.split(' ')[1];
 
-  // Check if the token is provided
-  if (!token) {
-    return res.status(401).json({ message: "Access denied. No token provided" });
-  }
-
-  // Verify the token
+  console.log(token);
   jwt.verify(token, 'your_secret_key', (err, decoded) => {
     if (err) {
+      console.log('JWT Verification Failed:', err); // Log error
       return res.status(403).json({ message: "Invalid token" });
     }
 
-    // If the token is valid, proceed to add the review
     const { username } = decoded; // Extract username from the decoded token
-    // Add the review logic here (not implemented in this example)
+    const { review } = req.body; // Get review and rating from request body
+    const { isbn } = req.params; // Get the ISBN from the URL parameter
 
-    return res.status(200).json({ message: `Review added by ${username}` });
+
+    const book = books[isbn];
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    book.reviews[username] = {
+      review,
+      date: new Date().toISOString(), // Store the current date/time
+    };
+
+    return res.status(200).json({ message: `Review added by ${username} for book ${book.title}` });
+  
+  });
+
+});
+
+
+regd_users.delete("/auths/review/:isbn", (req, res) => {
+  // Step 1: Get the token from the Authorization header
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Invalid token format' });
+  }
+  const token = authHeader.split(' ')[1];
+
+  // Step 2: Verify the token
+  console.log(token);
+  jwt.verify(token, 'your_secret_key', (err, decoded) => {
+    if (err) {
+      console.log('JWT Verification Failed:', err); // Log error
+      return res.status(403).json({ message: "Invalid token" });
+    }
+
+    const { username } = decoded; // Extract username from the decoded token
+    const { isbn } = req.params; // Get the ISBN from the URL parameter
+
+    // Step 3: Find the book using ISBN
+    const book = books[isbn];
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    // Step 4: Check if the user has reviewed this book
+    if (!book.reviews[username]) {
+      return res.status(404).json({ message: "No review found from this user for the given book" });
+    }
+
+    // Step 5: Delete the review
+    delete book.reviews[username]; // Remove the review for the given username
+
+    return res.status(200).json({ message: `Review deleted for book ${book.title} by ${username}` });
   });
 });
+
+
+
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
