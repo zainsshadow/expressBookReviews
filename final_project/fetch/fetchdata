@@ -1,0 +1,90 @@
+const axios = require('axios'); // Axios for data fetching
+
+// Fetch all books data from the API
+const fetchAllBooksData = async () => {
+  try {
+
+    const response = await axios.get('https://localhost:5000');  
+    console.log('Fetched books data:', response.data);
+    return response.data;  // Return the data for further use
+  } catch (error) {
+    // Error handling for the request
+    console.error('Error fetching data:', error.message);
+    throw error;  // Rethrow if you need to handle it elsewhere
+  }
+};
+
+// Fetch book details by ISBN
+const fetchBookByISBN = async (isbn) => {
+  try {
+
+    const response = await axios.get(`https://localhost:5000/isbn/${isbn}`);
+    console.log('Book details fetched by ISBN:', response.data);
+    return response.data;  // Return the book data
+  } catch (error) {
+    // Error handling for fetching by ISBN
+    console.error('Error fetching book by ISBN:', error.message);
+    throw error;  // Rethrow the error for further handling
+  }
+};
+
+// Fetch books by author
+const fetchBooksByAuthor = async (author) => {
+  try {
+
+    const response = await axios.get(`https://localhost:5000/author/${author}`);
+    console.log('Books by author fetched:', response.data);
+    return response.data;  // Return the books data
+  } catch (error) {
+    // Error handling for fetching books by author
+    console.error('Error fetching books by author:', error.message);
+    throw error;  // Rethrow to handle it elsewhere if needed
+  }
+};
+
+// Fetch books by title
+const fetchBooksByTitle = async (title) => {
+  try {
+
+    const response = await axios.get(`https://localhost:5000/title/${title}`);
+    console.log('Books by title fetched:', response.data);
+    return response.data;  // Return the fetched books data
+  } catch (error) {
+    // Error handling for fetching books by title
+    console.error('Error fetching books by title:', error.message);
+    throw error;  // Rethrow the error if you want to handle it further up
+  }
+};
+
+// Example usage of the functions:
+
+// Fetch all books
+fetchAllBooksData().then((books) => {
+  console.log('All books:', books);
+}).catch((error) => {
+  console.log('Failed to fetch all books:', error);
+});
+
+// Fetch a book by ISBN
+const isbn = '1234567890';  // Replace with actual ISBN
+fetchBookByISBN(isbn).then((book) => {
+  console.log('Fetched book by ISBN:', book);
+}).catch((error) => {
+  console.log('Failed to fetch book by ISBN:', error);
+});
+
+// Fetch books by author
+const author = 'Jane Austen';  // Replace with actual author name
+fetchBooksByAuthor(author).then((books) => {
+  console.log('Books by author:', books);
+}).catch((error) => {
+  console.log('Failed to fetch books by author:', error);
+});
+
+// Fetch books by title
+const title = 'Pride and Prejudice';  // Replace with actual title
+fetchBooksByTitle(title).then((books) => {
+  console.log('Books by title:', books);
+}).catch((error) => {
+  console.log('Failed to fetch books by title:', error);
+});
